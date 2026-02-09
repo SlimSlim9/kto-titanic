@@ -1,0 +1,6 @@
+# TODO : Créer le projet Mlflow
+
+# TODO : D'abord en local dans le venv
+# TODO : Puis dans un conteneur Docker créé à partir de votre image stockée dans quay
+
+# TODO : Définir l'entrypoint main, déclarer les paramètres, lancer le workflow avec uv run

@@ -1,0 +1,49 @@
+[project]
+name = "kto-titanic"
+version = "0.1.0"
+description = "Kto Titanic Project"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fire>=0.7.1",
+    # TODO : Ajouter les dépendances transverses manquantes
+]
+
+[project.scripts]
+hello = "titanic.main:main"
+api = "titanic.api.main:main"
+chatbot = "titanic.chatbot.app:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+api = [
+    # TODO : Ajouter les dépendances manquantes pour l'API
+]
+training = [
+    "setuptools>=80.9.0", # for ydata-profiling dependency, bug with python 3.13
+    # TODO : Ajouter les dépendances manquantes pour l'entrainement
+]
+chatbot = [
+    "streamlit>=1.40.0",
+    "langchain>=0.3.0",
+    "langchain-community>=0.3.0",
+    "langchain-openai>=0.2.0",
+    "langchain-mcp-adapters>=0.2.1",
+    "httpx>=0.28.0",
+]
+mcp-server = [
+    "uvicorn>=0.37.0",
+    "fastmcp>=0.4.0",
+    "httpx>=0.28.0",
+]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pre-commit>=3.7.1",
+    "ruff>=0.14.9",
+    "pyright>=1.1.407",
+    "httpx>=0.28.0",
+]

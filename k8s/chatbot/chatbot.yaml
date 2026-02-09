@@ -1,0 +1,79 @@
+# Note: This secret is created and managed by GitHub Actions CI/CD
+# See .github/workflows/deploy-chatbot.yml for the actual creation
+# The token value comes from GitHub Secrets (GH_MODELS_TOKEN)
+# This definition is here for documentation purposes only
+#
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: chatbot-secrets
+# type: Opaque
+# stringData:
+#   github-models-token: "<managed-by-cicd>"
+# ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: titanic-chatbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: titanic-chatbot
+  template:
+    metadata:
+      labels:
+        app: titanic-chatbot
+    spec:
+      containers:
+        - name: titanic-chatbot
+          image: quay.io/slimzch/titanic/chatbot
+          env:
+            - name: TITANIC_API_URL
+              value: "http://titanic-api-service.slimzch-dev.svc.cluster.local:8080"
+            - name: MCP_SERVER_HOST
+              value: "http://titanic-mcp-server.slimzch-dev.svc.cluster.local:8000"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: chatbot-secrets
+                  key: github-models-token
+            - name: OPENAI_BASE_URL
+              value: "https://models.github.ai/inference"
+            - name: LLM_MODEL
+              value: "gpt-4o-mini"
+          ports:
+            - containerPort: 8501
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: titanic-chatbot-service
+spec:
+  selector:
+    app: titanic-chatbot
+  ports:
+    - port: 8501
+      name: http-port
+      targetPort: 8501
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: titanic-chatbot
+spec:
+  to:
+    kind: Service
+    name: titanic-chatbot-service
+  port:
+    targetPort: http-port
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

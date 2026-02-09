@@ -1,0 +1,52 @@
+name: Train KTO Titanic model and Deploy API
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/titanic/api/**'
+      - 'src/titanic/training/**'
+      - 'src/titanic/ci/**'
+      - '/tests/api/**'
+      - '/tests/training/**'
+      - '/tests/ci/**'
+      - 'k8s/experiment/**'
+      - 'k8s/api/**'
+      - '.github/workflows/ct-ci-cd.yaml'
+  pull_request:
+    branches:
+      - main
+
+env:
+  EXPERIMENT_NAME: kto-titanic
+  EXPERIMENT_IMAGE_NAME: quay.io/slimzch/titanic/experiment
+  API_IMAGE_NAME: quay.io/slimzch/titanic/api
+  API_ROUTE_NAME: titanic-api
+  DAILYCLEAN_ROUTE_NAME: dailyclean
+  MINIO_API_ROUTE_NAME: minio-api
+  MLFLOW_TRACKING_ROUTE_NAME: mlflow
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.13
+      - name: Install dependencies
+        run: |
+          echo "To implement"
+          
+          # TODO: Saisir la suite de cette pipeline. Devrait apparaître : 
+          # Install depencies, Launch unit tests, Resync only training group,
+          # Configure docker and kubectl, Get Routes from Kubernetes and add them to env
+          # Wake up dailyclean and mlflow, Build training image, Launch mlflow training in Openshift.
+          # Une fois l'API développée, et sécurisée intégrer : 
+          # Download model artifact, Build and push api image, Configure API manifest with OAuth2 domain
+          # Deploy api to Openshift with OAuth2 protection, Get OAuth2 token for integration test
+          # Test api with OAuth2 authentication, Asleep kto-mlflow with dailyclean
+          
+          

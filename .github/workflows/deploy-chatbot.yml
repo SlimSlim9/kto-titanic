@@ -1,0 +1,40 @@
+name: Deploy Titanic Chatbot
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/titanic/chatbot/**'
+      - '/tests/chatbot/**'
+      - 'k8s/chatbot/**'
+      - '.github/workflows/deploy-chatbot.yml'
+  workflow_dispatch:
+
+env:
+  CHATBOT_IMAGE_NAME: quay.io/slimzch/titanic/chatbot
+  CHATBOT_DEPLOYMENT_NAME: titanic-chatbot
+  CHATBOT_SECRET_NAME: chatbot-secrets
+  CHATBOT_ROUTE_NAME: titanic-chatbot
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.13
+      - name: Install dependencies
+        run: |
+          echo "To implement"
+          
+          # TODO: Saisir la suite de cette pipeline. Devrait apparaître : 
+          # Install depencies, Launch unit tests,
+          # Configure docker and kubectl, Build and push Docker image
+          # Create or update Secret, Delete Chatbot pod to refresh secret,
+          # Deploy to OpenShift
