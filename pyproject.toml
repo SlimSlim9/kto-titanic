@@ -7,6 +7,8 @@ requires-python = ">=3.13"
 dependencies = [
     "fire>=0.7.1",
     # TODO : Ajouter les dépendances transverses manquantes
+    "pandas==2.3.3",
+    "scikit-learn==1.8.0",
 ]
 
 [project.scripts]
@@ -23,8 +25,10 @@ api = [
     # TODO : Ajouter les dépendances manquantes pour l'API
 ]
 training = [
+    "mlflow[extras]==3.8.1",
     "setuptools>=80.9.0", # for ydata-profiling dependency, bug with python 3.13
     # TODO : Ajouter les dépendances manquantes pour l'entrainement
+    "ydata-profiling==4.18.0",
 ]
 chatbot = [
     "streamlit>=1.40.0",
