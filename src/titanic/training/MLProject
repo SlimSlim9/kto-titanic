@@ -7,6 +7,9 @@
 
 name: kto-titanic
 
+docker_env:
+  image: quay.io/slimzch/titanic/experiment # <--- Remplacez par votre identifiant quay.io
+  
 entry_points:
 
   main:
