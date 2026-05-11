@@ -4,7 +4,7 @@ mlartifacts/
 mlruns.db
 mlflow.db
 
-# IDE
+## IDE
 .idea
 .vscode
 
