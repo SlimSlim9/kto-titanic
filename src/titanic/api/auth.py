@@ -10,7 +10,7 @@ from jwt.exceptions import ExpiredSignatureError, InvalidTokenError, InvalidAudi
 security = HTTPBearer()
 
 def verify_token(required_scope: str) -> Callable:
-    """Crée un validateur de token avec un scope spécifique via Auth0."""
+    """Create a token validator with a specific required scope using Auth0 JWKS."""
 
     async def _verify(credentials: HTTPAuthorizationCredentials = Security(security)) -> str:
         token = credentials.credentials
@@ -46,7 +46,7 @@ def verify_token(required_scope: str) -> Callable:
             if required_scope and required_scope not in token_scopes:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Permissions insuffisantes. Scope requis: {required_scope}",
+                    detail=f"Insufficient permissions. Required scope: {required_scope}",
                     headers={"WWW-Authenticate": f'Bearer scope="{required_scope}"'},
                 )
 
@@ -55,13 +55,13 @@ def verify_token(required_scope: str) -> Callable:
         except ExpiredSignatureError as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Le token a expiré",
+                detail="Token has expired",
                 headers={"WWW-Authenticate": "Bearer"},
             ) from e
         except (InvalidAudienceError, InvalidTokenError) as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Token invalide: {e!s}",
+                detail=f"Invalid token: {e!s}",
                 headers={"WWW-Authenticate": "Bearer"},
             ) from e
 
