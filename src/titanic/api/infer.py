@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from enum import Enum
 import pandas as pd
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 # TODO : Importer les dépendances OTEL pour le monitoring
 
 from titanic.api.auth import verify_token
