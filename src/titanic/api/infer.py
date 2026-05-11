@@ -54,7 +54,7 @@ def health() -> dict:
 
 # TODO : Ajoute les paramètres de la fonction (peut se faire en deux fois avec la sécurisation via oAuth2)
 @app.post("/infer")
-def infer(passenger: Passenger) -> list:
+def infer(passenger: Passenger, token: str = Depends(verify_token)) -> list:
 
     df_passenger = pd.DataFrame([passenger.to_dict()])
     df_passenger["Sex"] = pd.Categorical(df_passenger["Sex"], categories=[Sex.FEMALE.value, Sex.MALE.value])
