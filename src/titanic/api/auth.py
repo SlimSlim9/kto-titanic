@@ -6,7 +6,7 @@ import jwt
 from jwt import PyJWKClient
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError, InvalidAudienceError
 
-# On définit le schéma de sécurité (Bearer Token)
+# On éfinit le schéma de sécurité (Bearer Token)
 security = HTTPBearer()
 
 def verify_token(required_scope: str) -> Callable:
