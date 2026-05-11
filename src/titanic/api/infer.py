@@ -52,7 +52,7 @@ def health() -> dict:
     return {"status": "OK"}
 
 
-# TODO : Ajouter les paramètres de la fonction (peut se faire en deux fois avec la sécurisation via oAuth2)
+# TODO : Ajoute les paramètres de la fonction (peut se faire en deux fois avec la sécurisation via oAuth2)
 @app.post("/infer")
 def infer(passenger: Passenger) -> list:
 
