@@ -20,8 +20,8 @@ on:
 
 env:
   EXPERIMENT_NAME: kto-titanic
-  EXPERIMENT_IMAGE_NAME: quay.io/kto_gthomas/titanic/experiment
-  API_IMAGE_NAME: quay.io/kto_gthomas/titanic/api
+  EXPERIMENT_IMAGE_NAME: quay.io/slimzch/titanic/experiment
+  API_IMAGE_NAME: quay.io/slimzch/titanic/api
   API_ROUTE_NAME: titanic-api
   DAILYCLEAN_ROUTE_NAME: dailyclean
   MINIO_API_ROUTE_NAME: minio-api
@@ -40,10 +40,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install uv
-          uv sync --group training --group dev
+          uv sync --group training --group dev --group api
       - name: Launch unit tests
         run: |
-          uv run pytest tests/ci tests/training
+          uv run pytest tests/ci tests/training tests/api
       - name: Resync only training group
         run: |
           uv sync --group training
@@ -59,7 +59,7 @@ jobs:
           DAILYCLEAN_ROUTE_URL=$(kubectl get route ${{env.DAILYCLEAN_ROUTE_NAME}} -o jsonpath='{.spec.host}')
           MINIO_API_ROUTE_URL=$(kubectl get route ${{env.MINIO_API_ROUTE_NAME}} -o jsonpath='{.spec.host}')
           MLFLOW_TRACKING_ROUTE_URL=$(kubectl get route ${{env.MLFLOW_TRACKING_ROUTE_NAME}} -o jsonpath='{.spec.host}')
-
+          
           echo "DAILYCLEAN_ROUTE_URL=https://$DAILYCLEAN_ROUTE_URL" >> $GITHUB_ENV
           echo "MINIO_API_ROUTE_URL=https://$MINIO_API_ROUTE_URL" >> $GITHUB_ENV
           echo "MLFLOW_TRACKING_ROUTE_URL=https://$MLFLOW_TRACKING_ROUTE_URL" >> $GITHUB_ENV
@@ -80,15 +80,31 @@ jobs:
           export AWS_SECRET_ACCESS_KEY="${{secrets.AWS_SECRET_ACCESS_KEY}}"
 
           uv run mlflow run ./src/titanic/training -P path=all_titanic.csv --experiment-name ${{ env.EXPERIMENT_NAME }} --backend kubernetes --backend-config ./k8s/experiment/kubernetes_config.json
+      - name: Download model artifact
+        run: |
+          export MLFLOW_TRACKING_URI=$MLFLOW_TRACKING_ROUTE_URL
+          export MLFLOW_S3_ENDPOINT_URL=$MINIO_API_ROUTE_URL
+          export AWS_ACCESS_KEY_ID="${{vars.AWS_ACCESS_KEY_ID}}"
+          export AWS_SECRET_ACCESS_KEY="${{secrets.AWS_SECRET_ACCESS_KEY}}"
+          export ARTIFACT_URI=$(uv run -m titanic.ci.search_mlflow --experiment-name ${{ env.EXPERIMENT_NAME }})
+
+          echo "ARTIFACT_URI=$ARTIFACT_URI"
+          uv run mlflow artifacts download --artifact-uri $ARTIFACT_URI -d ./src/titanic/api/resources/
+      - name: Build and push api image
+        run: |
+          docker build -f k8s/api/Dockerfile -t ${{ env.API_IMAGE_NAME }}:latest .
+          docker push ${{ env.API_IMAGE_NAME }}:latest
+      - name: Configure API manifest with OAuth2 domain
+        run: |
+          sed -i 's|PLACEHOLDER_OAUTH2_DOMAIN|${{ vars.OAUTH2_DOMAIN }}|g' k8s/api/api.yaml
+          echo "✅ OAuth2 domain configured: ${{ vars.OAUTH2_DOMAIN }}"
+      - name: Deploy api to Openshift with OAuth2 protection
+        run: |
+          kubectl apply -f k8s/api/api.yaml
+          echo "✅ Deployment updated with OAuth2 protection"
+          API_ROUTE_URL=$(kubectl get route ${{ env.API_ROUTE_NAME }} -o jsonpath='{.spec.host}')
+          echo "API_ROUTE_URL=https://$API_ROUTE_URL" >> "$GITHUB_ENV"
+          echo "🚀 API deployed at: ${API_ROUTE_URL}"
       - name: Asleep kto-mlflow with dailyclean
         run: |
           curl -X POST $DAILYCLEAN_ROUTE_URL/pods/stop
-
-          # TODO: Saisir la suite de cette pipeline. Devrait apparaître : 
-          # Install depencies, Launch unit tests, Resync only training group,
-          # Configure docker and kubectl, Get Routes from Kubernetes and add them to env
-          # Wake up dailyclean and mlflow, Build training image, Launch mlflow training in Openshift.
-          # Une fois l'API développée, et sécurisée intégrer : 
-          # Download model artifact, Build and push api image, Configure API manifest with OAuth2 domain
-          # Deploy api to Openshift with OAuth2 protection, Get OAuth2 token for integration test
-          # Test api with OAuth2 authentication, Asleep kto-mlflow with dailyclean

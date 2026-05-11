@@ -15,6 +15,11 @@ spec:
       containers:
         - name: titanic-api
           image: quay.io/slimzch/titanic/api:latest
+          env:
+            - name: OAUTH2_DOMAIN
+              value: "PLACEHOLDER_OAUTH2_DOMAIN"
+            - name: OAUTH2_JWT_AUDIENCE
+              value: "titanic-api"
           ports:
             - containerPort: 8080
           resources:
