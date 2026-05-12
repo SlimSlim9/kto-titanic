@@ -23,6 +23,10 @@ build-backend = "setuptools.build_meta"
 [dependency-groups]
 api = [
     # TODO : Ajouter les dépendances manquantes pour l'API
+    "opentelemetry-api>=1.39.1",
+    "opentelemetry-exporter-otlp>=1.39.1",
+    "opentelemetry-instrumentation-fastapi>=0.60b1",
+    "opentelemetry-sdk>=1.39.1",
 ]
 training = [
     "mlflow[extras]==3.8.1",
