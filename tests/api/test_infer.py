@@ -56,7 +56,7 @@ def test_health_endpoint(client):
     """Test que le endpoint /health fonctionne."""
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "OK"}
+    assert response.json() == {"status": "OK", "model_loaded": False}
 
 
 def test_infer_first_class_female(client, mock_infer_model):
